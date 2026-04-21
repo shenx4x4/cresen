@@ -7,12 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*") // Penting agar frontend bisa akses
+@CrossOrigin(origins = "*", allowedHeaders = "*") // Izinkan semua akses untuk testing
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -26,31 +27,43 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
-        // Validasi jika user sudah ada
-        if (userRepository.findByUsername(request.get("username")).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Username sudah terdaftar!"));
+    public ResponseEntity<?> register(@RequestBody User user) {
+        System.out.println(">>> Menerima Request Register untuk user: " + user.getUsername());
+        
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Username sudah terpakai!"));
         }
 
-        User user = new User();
-        user.setUsername(request.get("username"));
-        user.setEmail(request.get("email"));
-        // Password di-hash dengan BCrypt sebelum masuk DB
-        user.setPassword(passwordEncoder.encode(request.get("password")));
-        user.setRole("ROLE_USER");
-        
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setBalance(0.0); // Set saldo awal
         userRepository.save(user);
-        return ResponseEntity.ok(Map.of("message", "Registrasi Berhasil"));
+
+        System.out.println(">>> User " + user.getUsername() + " berhasil didaftarkan!");
+        return ResponseEntity.ok(Map.of("message", "Registrasi berhasil!"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        Optional<User> userOpt = userRepository.findByUsername(request.get("username"));
-        
-        if (userOpt.isPresent() && passwordEncoder.matches(request.get("password"), userOpt.get().getPassword())) {
-            String token = jwtService.generateToken(userOpt.get().getUsername());
-            return ResponseEntity.ok(Map.of("token", token));
+        String username = request.get("username");
+        String password = request.get("password");
+
+        System.out.println(">>> Attempt Login untuk user: " + username);
+
+        Optional<User> userOpt = userRepository.findByUsername(username);
+
+        if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
+            String token = jwtService.generateToken(username);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("username", username);
+            response.put("message", "Login Berhasil");
+
+            System.out.println(">>> Login SUKSES untuk user: " + username);
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.status(401).body(Map.of("message", "Username atau Password salah"));
+
+        System.out.println(">>> Login GAGAL untuk user: " + username);
+        return ResponseEntity.status(401).body(Map.of("message", "Username atau Password salah!"));
     }
 }
