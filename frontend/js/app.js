@@ -1,4 +1,4 @@
-const API_BASE = 'http://127.0.0.1:8080/api/auth'; 
+const API_BASE = 'http://127.0.0.1:8080/api'; 
 
 // Fungsi Register
 async function handleRegister(event) {
