@@ -1,39 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cresen - Dashboard</title>
+    <title>Cresen - Dashboard Market</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .market-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px; border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .balance-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px; border-radius: 16px;
+            text-align: center; margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .price { color: #4ade80; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <div class="cresen-card" style="max-width: 600px; text-align: center;">
-        <h2>Welcome to Cresen Dashboard</h2>
-        <p style="margin-bottom: 20px; opacity: 0.8;">If you can see this, your JWT Token is valid!</p>
-        
-        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; word-break: break-all; margin-bottom: 20px;">
-            <small>Your Token:</small><br>
-            <span id="tokenDisplay" style="font-size: 0.8rem; color: #a5b4fc;"></span>
+    <div class="cresen-card" style="max-width: 500px;">
+        <div class="balance-card">
+            <small>Saldo Cresen Kamu</small>
+            <h1 id="user-balance">Rp 0</h1>
+            <button class="btn" style="width: auto; padding: 5px 20px; font-size: 0.8rem; background: #10b981;" onclick="handleTopUp()">+ Isi Saldo (50rb)</button>
         </div>
 
-        <button id="logoutBtn" class="btn" style="background: rgba(239, 68, 68, 0.4);">Logout</button>
+        <h3>Marketplace</h3>
+        <div class="market-grid" id="product-list">
+            <div class="product-card">
+                <div>
+                    <div style="font-weight: bold;">Loading Produk...</div>
+                </div>
+            </div>
+        </div>
+
+        <button id="logoutBtn" class="btn" style="margin-top: 30px; background: rgba(239, 68, 68, 0.3);">Logout</button>
     </div>
 
+    <script src="js/app.js"></script>
     <script>
-        // Cek apakah token ada, jika tidak, tendang ke halaman login
-        const token = localStorage.getItem('cresen_token');
-        if (!token) {
-            window.location.href = 'login.html';
-        } else {
-            document.getElementById('tokenDisplay').innerText = token;
-        }
-
-        // Fungsi Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('cresen_token');
-            window.location.href = 'login.html';
-        });
+        // Jalankan fungsi load data saat halaman dibuka
+        window.onload = loadDashboardData;
     </script>
 </body>
 </html>
-
