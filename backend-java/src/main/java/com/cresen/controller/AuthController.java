@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*") // Penting agar frontend bisa akses
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -24,15 +25,32 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
+        // Validasi jika user sudah ada
+        if (userRepository.findByUsername(request.get("username")).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Username sudah terdaftar!"));
+        }
+
+        User user = new User();
+        user.setUsername(request.get("username"));
+        user.setEmail(request.get("email"));
+        // Password di-hash dengan BCrypt sebelum masuk DB
+        user.setPassword(passwordEncoder.encode(request.get("password")));
+        user.setRole("ROLE_USER");
+        
+        userRepository.save(user);
+        return ResponseEntity.ok(Map.of("message", "Registrasi Berhasil"));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        Optional<User> user = userRepository.findByUsername(request.get("username"));
+        Optional<User> userOpt = userRepository.findByUsername(request.get("username"));
         
-        if (user.isPresent() && passwordEncoder.matches(request.get("password"), user.get().getPassword())) {
-            String token = jwtService.generateToken(user.get().getUsername());
+        if (userOpt.isPresent() && passwordEncoder.matches(request.get("password"), userOpt.get().getPassword())) {
+            String token = jwtService.generateToken(userOpt.get().getUsername());
             return ResponseEntity.ok(Map.of("token", token));
         }
-        return ResponseEntity.status(401).body(Map.of("message", "Invalid Cresen credentials"));
+        return ResponseEntity.status(401).body(Map.of("message", "Username atau Password salah"));
     }
 }
-
