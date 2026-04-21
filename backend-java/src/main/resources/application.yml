@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cresen_db
+    # Biarkan kosong jika Termux postgres auth tidak pakai password
+    username: 
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret: "CresenSuperSecretKeyWithAtLeast256BitsLengthForSecurity!"
+  expiration: 86400000
+  
