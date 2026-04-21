@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cresen - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="cresen-card" style="max-width: 600px; text-align: center;">
+        <h2>Welcome to Cresen Dashboard</h2>
+        <p style="margin-bottom: 20px; opacity: 0.8;">If you can see this, your JWT Token is valid!</p>
+        
+        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; word-break: break-all; margin-bottom: 20px;">
+            <small>Your Token:</small><br>
+            <span id="tokenDisplay" style="font-size: 0.8rem; color: #a5b4fc;"></span>
+        </div>
+
+        <button id="logoutBtn" class="btn" style="background: rgba(239, 68, 68, 0.4);">Logout</button>
+    </div>
+
+    <script>
+        // Cek apakah token ada, jika tidak, tendang ke halaman login
+        const token = localStorage.getItem('cresen_token');
+        if (!token) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('tokenDisplay').innerText = token;
+        }
+
+        // Fungsi Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('cresen_token');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
+
