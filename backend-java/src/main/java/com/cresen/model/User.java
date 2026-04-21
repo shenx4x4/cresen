@@ -20,7 +20,12 @@ public class User {
 
     private String role;
 
-    // Tambahkan Getter & Setter
+    // Tambahan kolom Saldo
+    @Column(nullable = false)
+    private Double balance = 0.0;
+
+    // Getters and Setters
+    public Long getId() { return id; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public String getEmail() { return email; }
@@ -29,5 +34,6 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public Double getBalance() { return balance; }
+    public void setBalance(Double balance) { this.balance = balance; }
 }
-
