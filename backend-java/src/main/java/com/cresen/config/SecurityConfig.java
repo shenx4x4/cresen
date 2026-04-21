@@ -5,13 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -24,28 +19,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(request -> {
-                var config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("*"));
-                config.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
-                config.setAllowedHeaders(List.of("*"));
-                return config;
-            }))
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable()) // Nonaktifkan CSRF karena kita pakai JWT
+            .cors(cors -> cors.configure(http)) // Izinkan akses dari port 5500
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Bebaskan akses login/register
-                .anyRequest().authenticated() // Sisanya wajib pakai Token JWT
+                .requestMatchers("/api/auth/**").permitAll() // Buka akses login & register
+                .requestMatchers("/api/shop/products").permitAll() // Izinkan liat produk tanpa login
+                .anyRequest().authenticated() // Sisanya (Beli & Topup) harus login
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }
-
